@@ -23,6 +23,16 @@ std::unique_ptr<std::vector<std::string>> split(std::string str,
   return result;
 }
 
+void remove(std::string& str, const std::string_view chars) {
+  for (int i = 0; i < str.size(); ++i) {
+    for (int j = 0; j < chars.size(); ++j) {
+      if (str[i] == chars[j]) {
+        str.erase(i, 1);
+      }
+    }
+  }
+}
+
 }  // namespace string
 }  // namespace utils
 }  // namespace sapv

@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
 
   std::unique_ptr<sapv::portfolio::PortfolioData> portfolio =
       sapv::portfolio::read(
-          "./portfolio.csv",
+          "/home/carter/Downloads/Portfolio_Positions_Jan-27-2024.csv",
           sapv::portfolio::FIDELITY);
 
   return 0;

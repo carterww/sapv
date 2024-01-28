@@ -12,6 +12,10 @@ namespace stock {
 // TODO: Create a builder for this class
 class StockData {
  public:
+  StockData() = default;
+  StockData(const StockData& other);
+  StockData(StockData&& other) = default;
+
   std::string ticker;
   std::string name;
   float current_price;
@@ -28,8 +32,8 @@ class StockData {
   std::optional<float> total_gain_loss_percent();
   std::optional<float> daily_gain_loss_absolute;
   std::optional<float> daily_gain_loss_percent();
-  std::optional<float> yearly_gain_loss_absolute;
-  std::optional<float> yearly_gain_loss_percent();
+
+  StockData& operator +=(const StockData&& other);
 };
 
 }  // namespace stock

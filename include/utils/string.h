@@ -12,6 +12,8 @@ namespace string {
 std::unique_ptr<std::vector<std::string>> split(std::string str,
                                                 const std::string_view delim);
 
+void remove(std::string& str, const std::string_view chars);
+
 }  // namespace string
 }  // namespace utils
 }  // namespace sapv
