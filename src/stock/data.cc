@@ -18,17 +18,6 @@ StockData::StockData(const StockData& other) {
   daily_gain_loss_absolute = other.daily_gain_loss_absolute;
 }
 
-StockData& StockData::operator+=(const StockData&& other) {
-  share_count = share_count.value_or(0.0f) + other.share_count.value_or(0.0f);
-  cost_basis_total =
-      cost_basis_total.value_or(0.0f) + other.cost_basis_total.value_or(0.0f);
-  total_gain_loss_absolute = total_gain_loss_absolute.value_or(0.0f) +
-                             other.total_gain_loss_absolute.value_or(0.0f);
-  daily_gain_loss_absolute = daily_gain_loss_absolute.value_or(0.0f) +
-                             other.daily_gain_loss_absolute.value_or(0.0f);
-  return *this;
-}
-
 float StockData::daily_change_percent() {
   if (previous_close_price == 0.0f) {
     return 0.0f;
@@ -58,6 +47,17 @@ std::optional<float> StockData::daily_gain_loss_percent() {
   }
   return daily_gain_loss_absolute.value() /
          (share_count.value() * previous_close_price);
+}
+
+StockData& StockData::operator+=(const StockData&& other) {
+  share_count = share_count.value_or(0.0f) + other.share_count.value_or(0.0f);
+  cost_basis_total =
+      cost_basis_total.value_or(0.0f) + other.cost_basis_total.value_or(0.0f);
+  total_gain_loss_absolute = total_gain_loss_absolute.value_or(0.0f) +
+                             other.total_gain_loss_absolute.value_or(0.0f);
+  daily_gain_loss_absolute = daily_gain_loss_absolute.value_or(0.0f) +
+                             other.daily_gain_loss_absolute.value_or(0.0f);
+  return *this;
 }
 
 }  // namespace stock

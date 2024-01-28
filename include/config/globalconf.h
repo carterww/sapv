@@ -13,10 +13,10 @@ class GlobalConfig {
   GlobalConfig(const std::string_view path);
   ~GlobalConfig();
 
-  int32_t time_between_requests();
-  const std::vector<std::string>& display_mode_directories();
-  const std::string& display_mode();
-  bool start_web_gui();
+  int32_t time_between_requests() const;
+  const std::vector<std::string>& display_mode_directories() const;
+  const std::string& display_mode() const;
+  bool start_web_gui() const;
 
  private:
   // Properties of the config.json file

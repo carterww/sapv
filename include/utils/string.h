@@ -14,6 +14,8 @@ std::unique_ptr<std::vector<std::string>> split(std::string str,
 
 void remove(std::string& str, const std::string_view chars);
 
+void to_upper(std::string& str);
+
 }  // namespace string
 }  // namespace utils
 }  // namespace sapv

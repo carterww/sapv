@@ -1,4 +1,5 @@
 #include "portfolio/data.h"
+#include <iostream>
 #include "stock/data.h"
 
 namespace sapv {
@@ -65,15 +66,14 @@ std::optional<float> PortfolioData::daily_gain_loss_percent() {
 
 void PortfolioData::add_stock(const sapv::stock::StockData& stock) {
   stock::StockData stock_copy = stock;
-  int index = this->find_stock(stock.ticker);
-  if (index == -1) {
-    stocks.push_back(stock);
-  } else {
-    stocks[index] += std::move(stock_copy);
-  }
+  this->add_stock(std::move(stock_copy));
 }
 
 void PortfolioData::add_stock(sapv::stock::StockData&& stock) {
+  if (stock.ticker.empty()) {
+    return;
+  }
+
   int index = this->find_stock(stock.ticker);
   if (index == -1) {
     stocks.push_back(stock);
@@ -88,6 +88,10 @@ int PortfolioData::find_stock(const std::string& ticker) {
       return i;
   }
   return -1;
+}
+
+const std::vector<sapv::stock::StockData>& PortfolioData::get_stocks() const {
+  return stocks;
 }
 
 }  // namespace portfolio

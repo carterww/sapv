@@ -8,12 +8,12 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
-typedef nlohmann::json json;
-
 namespace sapv {
 
 HttpRequestHeaders::HttpRequestHeaders(
     const std::string_view path_to_headers_file) {
+  using json = nlohmann::json;
+
   typedef nlohmann::detail::value_t value_t;
   std::ifstream headers_file(path_to_headers_file.data());
   json data = json::parse(headers_file);

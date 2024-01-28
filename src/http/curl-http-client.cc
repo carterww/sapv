@@ -28,12 +28,18 @@ CurlHttpClient::CurlHttpClient() : HttpClient() {
 }
 
 CurlHttpClient::~CurlHttpClient() {
-  curl_easy_cleanup(this->curl);
   curl_global_cleanup();
 }
 
 std::unique_ptr<std::string> CurlHttpClient::get(const std::string_view url,
                                                  HttpRequestHeaders& headers) {
+  static CurlWriteDataBuffer buffer = {0};
+  this->curl = curl_easy_init();
+  if (buffer.data != nullptr) {
+    free(buffer.data);
+    buffer.data = nullptr;
+    buffer.size = 0;
+  }
   curl_easy_setopt(this->curl, CURLOPT_URL, url.data());
   curl_easy_setopt(this->curl, CURLOPT_HTTPGET, 1L);
 
@@ -49,11 +55,9 @@ std::unique_ptr<std::string> CurlHttpClient::get(const std::string_view url,
     }
   }
   for (int i = 0; i < headers.size(); i++) {
-    std::cout << headers[i] << std::endl;
     curl_easy_setopt(this->curl, CURLOPT_HTTPHEADER, headers[i].data());
   }
 
-  CurlWriteDataBuffer buffer = {0};
   curl_easy_setopt(this->curl, CURLOPT_WRITEFUNCTION, curl_write_callback);
   curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, (void*)&buffer);
 
@@ -65,10 +69,10 @@ std::unique_ptr<std::string> CurlHttpClient::get(const std::string_view url,
   }
   std::unique_ptr<std::string> result =
       std::make_unique<std::string>(buffer.data);
-  free(buffer.data);
 
   // Add this back
   headers.add_header("Accept-Encoding", accepted_encodings);
+  curl_easy_cleanup(this->curl);
   return result;
 }
 

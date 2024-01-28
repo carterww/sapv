@@ -9,7 +9,6 @@ namespace sapv {
 namespace stock {
 
 // Percent change/per share is calculated instead of being stored
-// TODO: Create a builder for this class
 class StockData {
  public:
   StockData() = default;
@@ -34,6 +33,13 @@ class StockData {
   std::optional<float> daily_gain_loss_percent();
 
   StockData& operator +=(const StockData&& other);
+};
+
+struct FetchedStockData {
+  float current_price;
+  float daily_change_absolute;
+  float open_price;
+  float previous_close_price;
 };
 
 }  // namespace stock

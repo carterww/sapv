@@ -49,24 +49,28 @@ void read_record(fidelity::FidelityDataRecord& record, std::string& line) {
   record.type = fields->at(15);
 }
 
-void move_record_to_stock(
-    const fidelity::FidelityDataRecord& record,
-    sapv::stock::StockData& stock) {
-  stock.ticker = std::move(record.symbol);
-  stock.name = std::move(record.description);
+void move_records_to_portfolio(
+    std::vector<fidelity::FidelityDataRecord>& records,
+    sapv::portfolio::PortfolioData* portfolio) {
+  for (fidelity::FidelityDataRecord& record : records) {
+    sapv::stock::StockData stock;
+    stock.ticker = std::move(record.symbol);
+    stock.name = std::move(record.description);
 
-  // This stuff will be updated on fetch
-  stock.current_price = record.last_price;
-  stock.total_gain_loss_absolute = record.total_gain_loss_dollar;
+    // This stuff will be updated on fetch
+    stock.current_price = record.last_price;
+    stock.total_gain_loss_absolute = record.total_gain_loss_dollar;
 
-  stock.share_count = record.quantity;
-  stock.cost_basis_total = record.cost_basis_total;
+    stock.share_count = record.quantity;
+    stock.cost_basis_total = record.cost_basis_total;
 
-  // Stuff we don't have, but will be fetched
-  stock.daily_change_absolute = 0.0f;
-  stock.daily_gain_loss_absolute = 0.0f;
-  stock.open_price = 0.0f;
-  stock.previous_close_price = 0.0f;
+    // Stuff we don't have, but will be fetched
+    stock.daily_change_absolute = 0.0f;
+    stock.daily_gain_loss_absolute = 0.0f;
+    stock.open_price = 0.0f;
+    stock.previous_close_price = 0.0f;
+    portfolio->add_stock(stock);
+  }
 }
 
 }  // namespace
@@ -84,18 +88,17 @@ std::unique_ptr<PortfolioData> read(const std::string_view path) {
   std::string line;
   std::getline(file, line);  // Skip header
 
-  std::unique_ptr<PortfolioData> portfolio = std::make_unique<PortfolioData>();
+  std::vector<FidelityDataRecord> records;
+  PortfolioData* portfolio = new PortfolioData();
   while (file.good()) {
     std::getline(file, line);
 
     FidelityDataRecord record;
     read_record(record, line);
-    stock::StockData stock;
-    move_record_to_stock(record, stock);
-    portfolio->add_stock((stock::StockData&&)stock);
+    records.push_back(record);
   }
-  // TODO: Convert records to stocks
-  return portfolio;
+  move_records_to_portfolio(records, portfolio);
+  return std::unique_ptr<PortfolioData>(portfolio);
 }
 
 }  // namespace fidelity

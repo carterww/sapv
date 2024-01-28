@@ -29,6 +29,7 @@ class PortfolioData {
 
   int find_stock(const std::string& ticker);
 
+  const std::vector<sapv::stock::StockData>& get_stocks() const;
  private:
   std::vector<sapv::stock::StockData> stocks;
 };
