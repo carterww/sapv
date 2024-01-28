@@ -10,10 +10,10 @@ namespace constants {
 const std::string PROJECT_DIR = "./";
 
 // Files
-const std::string YAHOO_FINANCE_REQUEST_HEADERS_FILE = PROJECT_DIR + "yahoo-finance-req.json";
+const std::string YAHOO_FINANCE_REQUEST_HEADERS_FILE =
+    PROJECT_DIR + "yahoo-finance-req.json";
 
-} // namespace constants
-} // namespace sapv
+}  // namespace constants
+}  // namespace sapv
 
-
-#endif // SAPV_CONSTANTS_FILES_H
+#endif  // SAPV_CONSTANTS_FILES_H
