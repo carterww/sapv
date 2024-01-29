@@ -12,6 +12,13 @@ GlobalConfig::GlobalConfig(const std::string_view path) {
   using json = nlohmann::json;
 
   std::ifstream file(path.data());
+  if (!file.is_open()) {
+    time_between_requests_ = 60;
+    display_mode_directories_ = {"./"};
+    display_mode_ = "terminal";
+    start_web_gui_ = false;
+    return;
+  }
   json data = json::parse(file);
   
   // TODO: Add error handling?
@@ -37,6 +44,16 @@ const std::string& GlobalConfig::display_mode() const {
 
 bool GlobalConfig::start_web_gui() const {
   return start_web_gui_;
+}
+
+const GlobalConfig* GlobalConfig::get_instance(const std::string_view path) {
+  // This will be allocated the entire time the program is running
+  // after first call
+  static GlobalConfig* instance = nullptr;
+  if (instance == nullptr) {
+    instance = new GlobalConfig(path);
+  }
+  return instance;
 }
 
 }  // namespace config

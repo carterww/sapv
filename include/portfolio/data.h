@@ -32,6 +32,9 @@ class PortfolioData {
   const std::vector<sapv::stock::StockData>& get_stocks() const;
  private:
   std::vector<sapv::stock::StockData> stocks;
+
+  // Wow friends
+  friend class PortfolioManager;
 };
 
 }  // namespace portfolio

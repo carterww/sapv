@@ -1,29 +1,46 @@
+#include <pthread.h>
+
 #include <iostream>
 #include <string>
-#include <thread>
-#include <chrono>
 
-#include "portfolio/read.h"
+#include "portfolio/manager.h"
 #include "stock/fetcher.h"
+#include "workers/update-stocks.h"
+
+// BIG TODO POSSIBLY: RACE CONDITION FOR DISPLAY READING INFO AND
+// FETCH THREAD UPDATING INFO. WILL THIS EVER MATTER? PROBABLY NOT.
 
 int main(int argc, char** argv) {
-  sapv::stock::fetcher::YahooFinanceStockFetcher fetcher("../yahoo-finance-req.json");
+  // Create our stock fetcher (YahooFinance)
+  sapv::stock::fetcher::YahooFinanceStockFetcher fetcher(
+      "../yahoo-finance-req.json");
 
-  std::unique_ptr<sapv::portfolio::PortfolioData> portfolio =
-      sapv::portfolio::read(
-          "../portfolios/fidelity.csv",
-          sapv::portfolio::FIDELITY);
+  // Create our portfolio manager
+  sapv::portfolio::PortfolioManager manager;
+  manager.read_portfolio("../portfolios/fidelity.csv",
+                         sapv::portfolio::FIDELITY);
+  // Add our stock fetcher to the portfolio manager
+  manager.set_stock_fetcher(
+      std::make_unique<sapv::stock::fetcher::YahooFinanceStockFetcher>(
+          "../yahoo-finance-req.json"));
 
-  for (const sapv::stock::StockData& stock : portfolio->get_stocks()) {
-    std::unique_ptr<sapv::stock::FetchedStockData> data =
-      fetcher.fetch(stock.ticker);
+  pthread_t fetch_thread, display_thread;
 
-    std::cout << "Current Price: " << data->current_price << std::endl;
-    std::cout << "Daily Gain/Loss: " << data->daily_change_absolute << std::endl;
-    std::cout << "Open Price: " << data->open_price << std::endl;
-    std::cout << "Previous close: " << data->previous_close_price << std::endl;
+  // Start the worker thread
+  int rc = pthread_create(&fetch_thread, NULL,
+                          sapv::worker::fetch_thread_worker, (void*)&manager);
+  if (rc) {
+    std::cerr << "Error: unable to create thread, " << rc << std::endl;
+    return 1;
+  }
 
-    std::this_thread::sleep_for(std::chrono::seconds(15));
+  void* status;
+  // Indefinite
+  pthread_join(fetch_thread, &status);
+
+  if (status) {
+    std::cerr << "Error: thread returned, " << status << std::endl;
+    return 1;
   }
 
   return 0;

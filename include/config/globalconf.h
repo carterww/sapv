@@ -10,15 +10,25 @@ namespace config {
 
 class GlobalConfig {
  public:
-  GlobalConfig(const std::string_view path);
   ~GlobalConfig();
+
+  // Delete copy and move constructors and assignment operators
+  GlobalConfig(const GlobalConfig&) = delete;
+  GlobalConfig& operator=(const GlobalConfig&) = delete;
+
+  GlobalConfig(GlobalConfig&&) = delete;
+  GlobalConfig& operator=(GlobalConfig&&) = delete;
 
   int32_t time_between_requests() const;
   const std::vector<std::string>& display_mode_directories() const;
   const std::string& display_mode() const;
   bool start_web_gui() const;
 
+  static const GlobalConfig* get_instance(const std::string_view path = "config.json");
+
  private:
+  GlobalConfig(const std::string_view path);
+
   // Properties of the config.json file
   int32_t time_between_requests_;
   std::vector<std::string> display_mode_directories_;
