@@ -15,9 +15,9 @@ class CurlHttpClient : public HttpClient {
   CurlHttpClient();
   ~CurlHttpClient();
 
-  std::unique_ptr<std::string> get(const std::string_view url,
+  std::shared_ptr<std::string> get(const std::string_view url,
                                    HttpRequestHeaders& headers) override;
-  std::unique_ptr<std::string> post(const std::string_view url,
+  std::shared_ptr<std::string> post(const std::string_view url,
                                     const std::string_view data,
                                     HttpRequestHeaders& headers) override;
 

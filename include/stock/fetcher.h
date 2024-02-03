@@ -34,7 +34,7 @@ class YahooFinanceStockFetcher : public StockFetcher {
   curl::CurlHttpClient client;
 
   std::unique_ptr<FetchedStockData> parse_response(
-      std::unique_ptr<std::string> response);
+      std::shared_ptr<std::string> response);
 };
 
 }  // namespace fetcher

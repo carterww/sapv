@@ -30,14 +30,14 @@ std::unique_ptr<FetchedStockData> YahooFinanceStockFetcher::fetch(
 
   std::cout << "Fetching " << url << std::endl;
 
-  std::unique_ptr<std::string> response = client.get(url, headers);
-  return parse_response(std::move(response));
+  std::shared_ptr<std::string> response = client.get(url, headers);
+  return parse_response(response);
 }
 
 // This needs to be broken up into smaller functions
 // but need to make sure it works first
 std::unique_ptr<FetchedStockData> YahooFinanceStockFetcher::parse_response(
-    std::unique_ptr<std::string> response) {
+    std::shared_ptr<std::string> response) {
   std::unique_ptr<FetchedStockData> result =
       std::make_unique<FetchedStockData>();
 

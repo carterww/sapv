@@ -31,15 +31,10 @@ CurlHttpClient::~CurlHttpClient() {
   curl_global_cleanup();
 }
 
-std::unique_ptr<std::string> CurlHttpClient::get(const std::string_view url,
+std::shared_ptr<std::string> CurlHttpClient::get(const std::string_view url,
                                                  HttpRequestHeaders& headers) {
   static CurlWriteDataBuffer buffer = {0};
   this->curl = curl_easy_init();
-  if (buffer.data != nullptr) {
-    free(buffer.data);
-    buffer.data = nullptr;
-    buffer.size = 0;
-  }
   curl_easy_setopt(this->curl, CURLOPT_URL, url.data());
   curl_easy_setopt(this->curl, CURLOPT_HTTPGET, 1L);
 
@@ -59,7 +54,8 @@ std::unique_ptr<std::string> CurlHttpClient::get(const std::string_view url,
   }
 
   curl_easy_setopt(this->curl, CURLOPT_WRITEFUNCTION, curl_write_callback);
-  curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, (void*)&buffer);
+  std::shared_ptr<std::string> data = std::make_shared<std::string>();
+  curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, (void*)&data);
 
   CURLcode opcode = curl_easy_perform(this->curl);
   if (opcode != CURLE_OK) {
@@ -67,33 +63,25 @@ std::unique_ptr<std::string> CurlHttpClient::get(const std::string_view url,
     error += curl_easy_strerror(opcode);
     throw std::runtime_error(error);
   }
-  std::unique_ptr<std::string> result =
-      std::make_unique<std::string>(buffer.data);
 
   // Add this back
   headers.add_header("Accept-Encoding", accepted_encodings);
   curl_easy_cleanup(this->curl);
-  return result;
+  return data;
 }
 
-std::unique_ptr<std::string> CurlHttpClient::post(const std::string_view url,
+std::shared_ptr<std::string> CurlHttpClient::post(const std::string_view url,
                                                   const std::string_view data,
                                                   HttpRequestHeaders& headers) {
   return std::make_unique<std::string>("Not implemented");
 }
 
-size_t curl_write_callback(char* ptr, size_t size, size_t nmemb, void* buff) {
+size_t curl_write_callback(char* ptr, size_t size, size_t nmemb, void* data) {
   size_t realsize = size * nmemb;
-  CurlWriteDataBuffer* buffer = (CurlWriteDataBuffer*)buff;
+  std::shared_ptr<std::string>* buffer = (std::shared_ptr<std::string>*)data;
+  (*buffer)->append(ptr, realsize);
+  (*buffer)->append("\0", 1);
 
-  void* new_ptr = realloc(buffer->data, buffer->size + realsize + 1);
-  if (new_ptr == nullptr)
-    return 0;
-
-  buffer->data = (char*)new_ptr;
-  memcpy(&(buffer->data[buffer->size]), ptr, realsize);
-  buffer->size += realsize;
-  buffer->data[buffer->size] = 0;
 
   return realsize;
 }
